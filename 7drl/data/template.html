@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>7drl</title>
+    <style>
+      body {
+        background-color: #000;
+      }
+
+      .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block;}
+      textarea.emscripten { font-family: monospace; width: 80%; }
+      div.emscripten { text-align: center; }
+
+      /* !dont use a border or padding on canvas! */
+      canvas.emscripten {
+        border: 0px none;
+        background-color: black;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -webkit-crisp-edges;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+
+      /* uncomment for a fullscreen canvas */
+      /* .emscripten { padding-right: 0; margin-left: 0; margin-right: 0; }
+      body { margin: 0; }
+      input {display: none; } */
+      </style>
+  </head>
+
+  <body>
+    <!-- the webgl html5 canvas -->
+    <!-- <div class="emscripten_border"> -->
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
+    <!-- </div> -->
+
+    <!-- fullscreen button -->
+    <!-- <div class="emscripten">
+      <input type="button" value="Fullscreen" onclick="Module.requestFullscreen()">
+    </div> -->
+
+    <!-- script to run the game -->
+    <script language="javascript" type="text/javascript">
+      var Module = {
+        preRun: [],
+        postRun: [],
+        print: (function() {
+          var element = document.getElementById('output');
+          if (element) element.value = '';
+          return function(text) {
+            element.innerHTML += text.replace('\n', '<br>', 'g') + '<br>';
+          };
+        })(),
+        printErr: function(text) {
+          console.error(text);
+        },
+        print: function(text) {
+          console.log(text);
+        },
+        canvas: (function() {
+          var canvas = document.getElementById('canvas');
+          // canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
+          canvas.focus();
+          canvas.addEventListener('mousedown', function(event) {
+              canvas.focus();
+          }, false);
+          return canvas;
+        })(),
+      };
+    </script>
+<!--     <script>
+      window.onload = function () { window.focus(); } window.onclick = function () { window.focus(); };
+    </script> -->
+    {{{ SCRIPT }}}
+  </body>
+</html>

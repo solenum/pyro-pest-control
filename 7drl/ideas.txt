@@ -1,0 +1,261 @@
+/*
+- pick a size between 8x8 - 18x18
+- keep all tiles/characters to the size you pick
+- smaller is better, can scale things up myself
+- bigger enemies can be multiple tiles, preferable 2x2 and 3x3
+  not 1x3 and 2x1 etc
+
+- meaty enemies (ones that arent say, skeletons) might drop
+	raw meat, you can hit this with a fire spell or throw it on
+	a burning tile to cook it and make it edible, restoring hp
+
+- equipment will consist of 3 spell slots, you can find more
+	spells in the dungeons and replace your current ones with them
+	different spells have different cooldowns but there is no MP
+	nor other limiting factor like stamina etc
+
+- fire will spread, gas will spread, gas catches on fire, barrels
+	can explode, fleshy enemies can catch on fire and spread it also
+
+- boss will be a rat king (google it) and will spawn lots of
+  little rat enemies around that consist of a single tile each
+  while the boss rat-king will be 2x2 or 3x3 tiles
+
+- perhaps only use white pixels/shades of white/grey/etc?
+  I could then render them in-game and change the color per-tile
+	as needed
+
+- earlier levels are well lit with torches on walls, the further
+  down you go the less lit up levels are
+
+- player has ambient lighting allowing limited vision, the lower down
+  in the dungeon you go the smaller this area and ambient light is
+
+- perhaps add a way to gain more spell slots, either through leveling
+  up, finding a certain item or eating enough of something idk
+
+tiles needed:
+	- wood floor
+	- stone or brick wall
+  - wood wall
+	- wood door
+	- stone or metal door
+	- water
+	- gas cloud (will catch on fire and spread etc)
+  - down stairs
+  - up stairs
+
+item tiles needed:
+  - a spell scroll
+	- a chest
+	- a barrel
+	- raw and cooked meat
+	- potion pot
+
+character tiles needed:
+	- wizard/pyro (player character)
+	- goblin
+	- skeleton
+  - big slime (2x2 tiles)
+	- normal slime (1 tile)
+	- rat king (2x2 or 3x3 tile sized rat king, google rat-king)
+	- normal rat (1 tile)
+
+spells:
+  - details:
+    player has 3 spell slots, starts with firetorch and
+    one random low-tier spell
+    perhaps spells you find have varying stability stats
+    that effect the chance of it casting right, going wrong
+    doing more or less damage, etc.
+    some might be stable, unstable, unwieldy, violent, etc
+
+  - firetorch: zero range, zero fire chance, zero damage
+    a torch made out of fire, handle included
+    simply lights up the area around the player
+
+  - firespirit: infinite range, low fire chance, low damage
+    a living fire spirit follows the player around attacking
+    enemies it encounters, lighting the areas as well
+    ( it has legs )
+    low chance of setting fires
+
+  - firebolt: moderate range, low fire chance, low damage
+    fast usage
+    pyro bread and butter, can be used every turn or two
+    fires a single bolt of fire in a given direction
+    rarely sets fire to anything
+
+  - firesurge: moderate range, medium fire chance, low damage
+    medium usage
+    spawns an arch of fire balls that fire off in a given direction
+    with a chance of setting fire to the things they hit
+
+  - firestorm: moderate range, high fire chance, medium damage
+    slow usage
+    spawns fireballs from the sky over time in a specified area
+    area requires line of sight and to be in spell distance
+    high chance of causing fires
+
+  - firewall: moderate range, zero fire chance, medium damage
+    slow usage
+    shoots a fireball off in a given direction, once it hits something
+    it spawns a wall of fire spanning from the wall it hit to the
+    adjacent wall
+    can set fire to enemies walking though it
+
+  - firepush: 1 range, 100% fire chance, zero damage
+    medium usage
+    clumsily shove an enemy backwards with your pyro flame
+    slightly hurting yourself in the process
+    sets fire to the enemy pushed
+
+  - immolate: zero range, 100% fire chance, low damage
+    fast usage
+    set self on fire for a set (low) number of turns
+    slowly hurts self each turn
+    attacking enemies set on fire and flee
+    also lights area around player
+
+  - absorbflame: 1 range, 0% fire chance, zero damage
+    very slow usage
+    absorb flames around the player, causing massive self-damage
+    resets all spell cooldowns by amount of fire consumed
+
+  - methanemortar: low range, 0% fire chance, low damage
+    slow usage
+    relieve yourself of gas setting fire to it as you do
+    hurling you a few tiles in a specified direction
+    low chance of low self-damage
+
+  - firespray: low range, 10)% fire chance, medium damage
+    slow usage
+    spews fire in a 360 degrees spreading outwards from the
+    players position
+    no self-damage
+
+  - hellfire: high range, 100% fire chance, high damage
+    very very slow usage
+    shoots a fireball off in a given direction, once it hits something
+    it explodes into fire that engulfs a large section of the map
+    uses dijkstra maps and essentially bucket-fill
+    sets fire to everything in its path
+
+  - magma-spawning spells?
+
+  - airfire:
+
+  - fireportal:
+
+  - firemapping:
+
+-- dijkstra maps --
+  - make a copy of the map
+  - for each cell calculate the steps required
+    to get there from the player, some loot etc
+  - this is done by having an integer representation
+    of the map, the goals are set to 0 or lower and
+    the rest of the cells are set to an infinite high
+    number, you iterate over all of the cells and set
+    any cell with a value higher than 1 to the lowest
+    value neighboring cell, repeat until no infinite
+    high value cells are left
+  - enemies that need to get to the player simply
+    step to the lowest number cell around them
+    essentially sliding down hill
+  - multiple targets can exist, for example cells
+    near treasure might also have a lower value
+    meaning an enemy could slide down to you
+    or the gold depending on where it is
+    cells can be weighted more for higher priority
+    this is done by giving them a lower weight
+    such as -4, because we are rolling down-hill
+  - the cell map can be inverted (* -1.2) to create
+    a fleeing map, so that enemies can run away
+  - autoexplore can be implemented by treating all
+    unexplored cells as goals
+  - mouse pathfinding can be done by picking the cell
+    that the mouse clicks, and walking down hill to
+    the goal storing the position of each cell you hit
+  - can also use them for lighting, every goal is a light
+    source, which naturally gives you a sort of global
+    illumination effect
+
+-- dijkstra maps --
+  - function takes two arrays, from and to positions, and size
+  - as well as a list of walkable tiles
+  - make a copy of map or area of map
+  - set all walkable tiles to very high values
+  - set a goal or multiple goals (value 0 or lower)
+  - iterate over map
+  - set the value of each tile to the lowest value neighbour tile +1
+  - repeat until a pass makes no changes
+  - done
+
+-- entity rendering / ecs / characters / player --
+  - perhaps an array as big as the map to indicate if a tile is occupied?
+  - could have an enum of entity types, will make collision lists easier
+    for spells, movement etc
+  - all entities share same struct, player included
+  - function pointers for update functions etc
+  - all share the same lerp code
+  - have two positions, current and goal
+  - each step they lerp from the current position to the goal
+  - speed value indicates how many turns they get
+  - a speed of 2 will mean that entity has its update func run twice
+
+-- spells --
+  - when a spell is cast, the spell entity is spawned next to the caster
+  - its goal position is set to where it was aimed
+  - then the update step runs as normal
+  - spells have function pointers that are called when it hits something
+  - has a list of things it collides with?
+
+-- player --
+  - can move, pick a spell and cast it, etc
+  - picking a spell starts aiming mode
+  - aiming mode just aims towards mouse
+  - if keyboard is used, enable virtual mouse
+
+-- update process --
+  - wait for input from player, like move or fire off spell
+  - do an update step for every entity, player included
+  - recalculate dijkstra maps and lighting etc
+  - character tiles will cycle every second or so for animation
+  - lighting tiles will flicker every second or so
+
+-- lighting --
+  - generate a dijkstra map specifically for lighting
+  - each light source is a goal
+  - iterate over dmap and render light squares that are on screen
+  - cap at a max tile value
+
+-- fire --
+  ?
+
+-- gas --
+  ?
+
+-- water --
+  ?
+
+-- gui / tui --
+  ?
+
+-- main menu --
+  ?
+
+-- field of vision --
+  - raycasting in a 360 degree circle for FoV (infinite distance)
+  - players dijkstra map could be used for sound-vision
+  - enemies within a certain walk distance but not visible are
+    rendered as question marks or something because you can hear them?
+  - player-cast spells are uneffected by FoV and are always visible
+  - fire is effect by FoV
+
+-- fog of war --
+  - have a char array the size of the map
+  - values indicate opacity
+  - values are reduced each turn based on player FoV
+  - spells, fire etc all reveal the fog of war
+*/
